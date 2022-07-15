@@ -306,9 +306,11 @@ M_prop$VP.p = pred.VP
 
 ```
 
-# Plotting the Chamber Data
+# Saving and Plotting the Chamber Data
 
 ```{r}
+write.csv(M_prop, "Write_Files/Predicted_Properties.csv")
+
 M_prop %>% 
   ggplot(aes(x = Cnum.p, y = OSc.p, color = File_num))+
   geom_point()+
@@ -328,90 +330,3 @@ M_prop %>%
 
 ```
 
-
-
-```{r}
-for(i in 1:length(MS_t)){
-  
-  
-}
-
-amz_table_t = amz_table_o %>% 
-    dplyr::mutate(MS = strsplit(as.character(MS), ";")) %>% 
-    unnest(MS) %>% 
-    filter(MS != "") %>% 
-    dplyr::mutate(MS2 = trim.leading(MS)) 
-  
-
-
-
-amz_table_3 = separate(data = amz_table_t, col = MS2, into = c("mz", "intensity"), sep = " ")
-
-amz_table_full = amz_table_3 %>% 
-  dplyr::mutate(intensity = as.numeric(intensity)) %>% 
-  dplyr::mutate(mz = as.numeric(mz)) %>% 
-  arrange(desc(intensity)) %>% 
-  arrange(desc(Name)) %>% 
-  group_by(Name) %>%
-  dplyr::mutate(my_ranks = order(order(intensity, decreasing=TRUE))) %>% 
-  ungroup()
-
-amz_names <- amz_table_o %>% 
-  dplyr::select("Name")
-
-amz_table_trimmed = amz_table_full %>% 
-  filter(my_ranks < 11)
-
-mz_tab.a <- as.data.frame(table(amz_table_trimmed$mz))
-
-mz_tab.a <- mz_tab.a %>% 
-  dplyr::mutate(mz = as.character(Var1)) %>% 
-  dplyr::mutate(mz = as.numeric(mz))
-mz_tab.a <- mz_tab.a %>% 
-  arrange(desc(Freq)) %>% 
-  dplyr::mutate(freq_ranks = order(order(Freq, decreasing = TRUE)))
-
-amz_table_ranked <- amz_table_trimmed %>% 
-  left_join(mz_tab.a) 
-# %>% 
-#   filter(freq_ranks< 41)
-
-# note- here selecting only the MZ of the most common ES list so that the
-#model will be usable
-amz_common_mz = amz_table_ranked %>%
-  dplyr::select(Name, mz, intensity) %>% 
-  dplyr::mutate(mz = paste("mz_", mz, sep = "_")) %>% 
-  dplyr::mutate(mz_obs = TRUE) %>% 
-  dplyr::mutate(mz_intensity = intensity) %>% 
-  left_join(peak_list.es) %>% 
-  filter(istop40 == TRUE) %>% 
-  dplyr::select(-istop40)
-
-wide_mz.a = amz_common_mz %>% 
-  dplyr::select(Name, mz, mz_obs) %>% 
-  spread(mz, mz_obs, fill = FALSE) 
-
-wide_mz.a <- amz_names %>% 
-  left_joinF(wide_mz.a)
-
-
-
-wide_mz_i.a = amz_common_mz %>% 
-  dplyr::select(Name, mz, mz_intensity) %>% 
-  spread(mz, mz_intensity, fill = 0) 
-  
-wide_mz_i.a <- amz_names %>% 
-  left_join0(wide_mz_i.a)
-
-
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
