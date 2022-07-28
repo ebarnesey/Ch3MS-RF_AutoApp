@@ -39,7 +39,7 @@ read_MS_files <- function(fi_name_short) {
   temp_bt <<- temp_bt
   var_name <- paste("MS_", fi_name_short, sep = "")
   assign(var_name, temp_bt, env = .GlobalEnv)
-  return(var_name)
+  return(temp_bt)
   
 }
 
